@@ -56,3 +56,6 @@ A sample screenshot is below:
 
 A .mov file containing a full session (screen recording) has also been uploaded. The file name starts with the prefix "Screen Recording".
 
+This recording has also been uploaded to YouTube (private) at: https://youtu.be/jiI4t9IkfW0.
+
+
