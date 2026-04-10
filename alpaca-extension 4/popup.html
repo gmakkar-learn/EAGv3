@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Alpaca Paper Trader</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; width: 420px; min-height: 500px; background: #fff; color: #111; font-size: 13px; }
+  .header { display: flex; align-items: center; justify-content: space-between; padding: 12px 16px; border-bottom: 1px solid #eee; }
+  .header h1 { font-size: 15px; font-weight: 600; color: #111; }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; }
+  .dot.live { background: #22c55e; }
+  .tabs { display: flex; border-bottom: 1px solid #eee; }
+  .tab { flex: 1; padding: 8px; text-align: center; font-size: 12px; font-weight: 500; cursor: pointer; color: #888; border-bottom: 2px solid transparent; user-select: none; }
+  .tab.active { color: #111; border-bottom-color: #111; }
+  .section { display: none; padding: 12px 16px; }
+  .section.active { display: block; }
+  .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .metric { background: #f8f8f8; border-radius: 8px; padding: 10px 12px; }
+  .metric label { font-size: 11px; color: #888; display: block; margin-bottom: 2px; }
+  .metric span { font-size: 16px; font-weight: 600; }
+  .pos { color: #16a34a; }
+  .neg { color: #dc2626; }
+  .card { border: 1px solid #eee; border-radius: 10px; padding: 12px 14px; margin-bottom: 10px; }
+  .card h3 { font-size: 12px; font-weight: 500; color: #888; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; }
+  .field { margin-bottom: 8px; }
+  .field label { font-size: 11px; color: #888; display: block; margin-bottom: 3px; }
+  .field input, .field select { width: 100%; padding: 6px 9px; font-size: 13px; border: 1px solid #ddd; border-radius: 6px; background: #fff; color: #111; outline: none; }
+  .field input:focus, .field select:focus { border-color: #aaa; }
+  .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .form-row.three { grid-template-columns: 1fr 1fr 1fr; }
+  .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+  .btn { flex: 1; padding: 7px; border-radius: 6px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; }
+  .btn-buy { background: #dcfce7; color: #16a34a; }
+  .btn-sell { background: #fee2e2; color: #dc2626; }
+  .btn-buy:hover { background: #bbf7d0; }
+  .btn-sell:hover { background: #fecaca; }
+  .btn-sm { padding: 3px 8px; font-size: 11px; border-radius: 5px; background: #f1f1f1; color: #555; border: none; cursor: pointer; }
+  .btn-sm:hover { background: #e5e5e5; }
+  .status { margin-top: 8px; padding: 7px 10px; border-radius: 6px; font-size: 12px; display: none; line-height: 1.4; }
+  .status.success { display: block; background: #dcfce7; color: #166534; }
+  .status.error { display: block; background: #fee2e2; color: #991b1b; }
+  .status.loading { display: block; background: #f3f4f6; color: #555; }
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  th { text-align: left; font-weight: 500; color: #888; padding: 4px 6px; border-bottom: 1px solid #eee; font-size: 11px; }
+  td { padding: 6px 6px; border-bottom: 1px solid #f5f5f5; color: #111; }
+  tr:last-child td { border-bottom: none; }
+  .badge { font-size: 10px; padding: 1px 6px; border-radius: 20px; font-weight: 500; }
+  .badge-filled { background: #dcfce7; color: #16a34a; }
+  .badge-pending { background: #fef9c3; color: #854d0e; }
+  .badge-canceled { background: #f3f4f6; color: #555; }
+  .badge-buy { background: #dbeafe; color: #1d4ed8; }
+  .badge-sell { background: #fee2e2; color: #dc2626; }
+  .empty { color: #aaa; font-size: 12px; padding: 16px 0; text-align: center; }
+  .settings-info { font-size: 12px; color: #888; margin-bottom: 12px; line-height: 1.5; }
+  .saved-badge { font-size: 11px; color: #16a34a; display: none; margin-left: 6px; }
+  .btn-close { padding: 2px 8px; font-size: 11px; border-radius: 5px; background: #fee2e2; color: #dc2626; border: none; cursor: pointer; font-weight: 500; }
+  .btn-close:hover { background: #fecaca; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>Alpaca Paper Trader</h1>
+  <div class="dot" id="status-dot"></div>
+</div>
+
+<div class="tabs">
+  <div class="tab active" data-tab="portfolio">Portfolio</div>
+  <div class="tab" data-tab="trade">Trade</div>
+  <div class="tab" data-tab="orders">Orders</div>
+  <div class="tab" data-tab="settings">Settings</div>
+</div>
+
+<div class="section active" id="portfolio">
+  <div class="metric-grid">
+    <div class="metric"><label>Equity</label><span id="m-equity">—</span></div>
+    <div class="metric"><label>Cash</label><span id="m-cash">—</span></div>
+    <div class="metric"><label>Buying power</label><span id="m-bp">—</span></div>
+    <div class="metric"><label>Day P&amp;L</label><span id="m-pnl">—</span></div>
+  </div>
+  <div class="card">
+    <h3>Open positions <button class="btn-sm" id="refresh-portfolio">↻ Refresh</button></h3>
+    <div id="positions-body"><div class="empty">Loading...</div></div>
+  </div>
+</div>
+
+<div class="section" id="trade">
+  <div class="card">
+    <h3>Place order</h3>
+    <div class="form-row">
+      <div class="field"><label>Symbol</label><input id="t-symbol" placeholder="AAPL" style="text-transform:uppercase"></div>
+      <div class="field"><label>Order type</label>
+        <select id="t-type">
+          <option value="market">Market</option>
+          <option value="limit">Limit</option>
+          <option value="stop">Stop</option>
+          <option value="stop_limit">Stop limit</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-row three">
+      <div class="field"><label>Quantity</label><input id="t-qty" type="number" min="1" value="1"></div>
+      <div class="field" id="limit-field" style="display:none"><label>Limit $</label><input id="t-limit" type="number" step="0.01" placeholder="0.00"></div>
+      <div class="field" id="stop-field" style="display:none"><label>Stop $</label><input id="t-stop" type="number" step="0.01" placeholder="0.00"></div>
+      <div class="field"><label>Time in force</label>
+        <select id="t-tif">
+          <option value="day">Day</option>
+          <option value="gtc">GTC</option>
+          <option value="ioc">IOC</option>
+          <option value="fok">FOK</option>
+        </select>
+      </div>
+    </div>
+    <div class="btn-row">
+      <button class="btn btn-buy" id="btn-buy">Buy</button>
+      <button class="btn btn-sell" id="btn-sell">Sell</button>
+    </div>
+    <div class="status" id="trade-status"></div>
+  </div>
+</div>
+
+<div class="section" id="orders">
+  <div class="card">
+    <h3>Recent orders <button class="btn-sm" id="refresh-orders">↻ Refresh</button></h3>
+    <div id="orders-body"><div class="empty">Loading...</div></div>
+  </div>
+</div>
+
+<div class="section" id="settings">
+  <div class="card">
+    <h3>API credentials <span class="saved-badge" id="saved-badge">✓ Saved</span></h3>
+    <p class="settings-info">Your credentials are stored locally in Chrome and never sent anywhere except Alpaca's API.</p>
+    <div class="field"><label>API Key</label><input id="s-key" type="password" placeholder="PKWQ..."></div>
+    <div class="field"><label>Secret Key</label><input id="s-secret" type="password" placeholder="HizS..."></div>
+    <div class="btn-row">
+      <button class="btn btn-buy" id="btn-save">Save credentials</button>
+    </div>
+  </div>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
