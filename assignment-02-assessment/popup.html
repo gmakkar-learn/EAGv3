@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CompetencyAssess</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+
+  <!-- HOME SCREEN -->
+  <div id="screen-home" class="screen active">
+    <div class="header">
+      <div class="header-left">
+        <div class="logo">CA</div>
+        <h1>CompetencyAssess</h1>
+      </div>
+      <button id="btn-settings" class="icon-btn" title="Settings">⚙</button>
+    </div>
+
+    <div class="section-label">Assessment Type</div>
+    <div class="tabs">
+      <button class="tab tab-active" data-type="pdf">PDF Document</button>
+      <button class="tab tab-disabled" title="Coming soon">Topic</button>
+      <button class="tab tab-disabled" title="Coming soon">Book</button>
+      <button class="tab tab-disabled" title="Coming soon">Course</button>
+    </div>
+
+    <div id="pdf-section">
+      <div class="section-label">PDF Source</div>
+      <div class="radio-row">
+        <label class="radio-label">
+          <input type="radio" name="pdf-source" value="url" checked>
+          <span>URL</span>
+        </label>
+        <label class="radio-label">
+          <input type="radio" name="pdf-source" value="file">
+          <span>Local File</span>
+        </label>
+      </div>
+
+      <div id="url-group" class="input-group">
+        <input type="url" id="pdf-url" placeholder="https://example.com/document.pdf" autocomplete="off">
+      </div>
+
+      <div id="file-group" class="input-group hidden">
+        <label class="file-label" id="file-label">
+          <span id="file-label-text">Choose PDF file…</span>
+          <input type="file" id="pdf-file" accept=".pdf">
+        </label>
+      </div>
+    </div>
+
+    <div id="api-warning" class="warning hidden">
+      ⚠ Please set your Gemini API key in Settings first.
+    </div>
+
+    <button id="btn-start" class="btn-primary">Start Assessment →</button>
+  </div>
+
+  <!-- LOADING SCREEN -->
+  <div id="screen-loading" class="screen">
+    <div class="loading-wrap">
+      <div class="spinner"></div>
+      <p id="loading-msg">Preparing document…</p>
+    </div>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="screen-quiz" class="screen">
+    <div class="quiz-top">
+      <span id="q-progress" class="q-progress">Question 1 / 5</span>
+      <div class="timer-block">
+        <span id="timer-text" class="timer-text">60s</span>
+        <div class="timer-track">
+          <div id="timer-fill" class="timer-fill"></div>
+        </div>
+      </div>
+    </div>
+
+    <div id="q-text" class="q-text"></div>
+
+    <div id="options-wrap" class="options-wrap"></div>
+
+    <div class="explain-block">
+      <label class="explain-label" for="explain-input">Explain your reasoning <span class="optional">(optional – counts toward score)</span></label>
+      <textarea id="explain-input" placeholder="Why did you choose this answer?"></textarea>
+    </div>
+
+    <button id="btn-submit" class="btn-primary" disabled>Submit Answer</button>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="screen-results" class="screen">
+    <div class="results-header">
+      <div class="total-ring">
+        <span id="total-val" class="total-val">0</span>
+        <span class="total-denom">/100</span>
+      </div>
+      <div class="result-title">Assessment Complete</div>
+    </div>
+
+    <div class="breakdown">
+      <div class="bk-row">
+        <span class="bk-label">Accuracy</span>
+        <div class="bk-track"><div id="bar-accuracy" class="bk-bar bar-accuracy"></div></div>
+        <span id="val-accuracy" class="bk-val">0/70</span>
+      </div>
+      <div class="bk-row">
+        <span class="bk-label">Articulation</span>
+        <div class="bk-track"><div id="bar-articulation" class="bk-bar bar-articulation"></div></div>
+        <span id="val-articulation" class="bk-val">0/20</span>
+      </div>
+      <div class="bk-row">
+        <span class="bk-label">Timeliness</span>
+        <div class="bk-track"><div id="bar-timeliness" class="bk-bar bar-timeliness"></div></div>
+        <span id="val-timeliness" class="bk-val">0/10</span>
+      </div>
+    </div>
+
+    <div class="suggestions-section">
+      <h3 class="suggestions-title">Question Review</h3>
+      <div id="suggestions-list"></div>
+    </div>
+
+    <button id="btn-restart" class="btn-secondary">Start New Assessment</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>

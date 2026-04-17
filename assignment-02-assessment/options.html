@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>CompetencyAssess – Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">CA</div>
+      <div>
+        <h1>Settings</h1>
+        <p class="subtitle">CompetencyAssess</p>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Gemini API Key</h2>
+      <p class="hint">
+        Your API key is stored locally in your browser and is never sent anywhere except directly to the Google Gemini API.
+        Get your key at <a href="https://aistudio.google.com/app/apikey" target="_blank">aistudio.google.com</a>.
+      </p>
+
+      <div class="field">
+        <label for="api-key-input">API Key</label>
+        <div class="input-row">
+          <input type="password" id="api-key-input" placeholder="Paste your Gemini API key here" autocomplete="off" spellcheck="false">
+          <button id="btn-toggle" class="btn-icon" title="Show/hide key">👁</button>
+        </div>
+      </div>
+
+      <div id="status-msg" class="status-msg hidden"></div>
+
+      <div class="actions">
+        <button id="btn-save" class="btn-primary">Save</button>
+        <button id="btn-clear" class="btn-ghost">Clear</button>
+      </div>
+    </div>
+
+    <div class="card info-card">
+      <h2>How Scoring Works</h2>
+      <table class="score-table">
+        <tr><td>Accuracy</td><td>70%</td><td>Correct answers to MCQs</td></tr>
+        <tr><td>Articulation</td><td>20%</td><td>Quality of your explanations (rated by Gemini)</td></tr>
+        <tr><td>Timeliness</td><td>10%</td><td>How quickly you answered (budget: 60 s / question)</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>
