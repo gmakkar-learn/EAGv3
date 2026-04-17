@@ -1,3 +1,7 @@
+# Link to demo
+
+https://youtu.be/zj9P7gg9RLE
+
 # CompetencyAssess
 
 A Chrome extension that helps you evaluate your own understanding of any PDF document — a textbook chapter, a research paper, a course handout, or a technical specification — by generating a personalised multiple-choice quiz powered by the Gemini API.
