@@ -1,0 +1,14 @@
+{
+  "manifest_version": 3,
+  "name": "Stock Info",
+  "version": "1.0",
+  "description": "Query real-time stock information powered by an AI agent.",
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Stock Info"
+  },
+  "permissions": [],
+  "host_permissions": [
+    "http://127.0.0.1:5001/*"
+  ]
+}

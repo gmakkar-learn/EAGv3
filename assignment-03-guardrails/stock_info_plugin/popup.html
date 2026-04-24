@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Stock Info</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <div class="container">
+
+    <!-- Header -->
+    <header class="header">
+      <svg class="header-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/>
+        <polyline points="16 7 22 7 22 13"/>
+      </svg>
+      <span class="header-title">Stock Info</span>
+      <span class="header-badge">AI Agent</span>
+    </header>
+
+    <!-- Search -->
+    <div class="search-section">
+      <div class="input-wrapper">
+        <input
+          id="queryInput"
+          type="text"
+          class="query-input"
+          placeholder="e.g. What is Apple's current stock price?"
+          autofocus
+        />
+        <button id="searchBtn" class="search-btn" title="Search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+        </button>
+      </div>
+      <p class="hint">Supported: Apple · Google · Microsoft · Amazon · Tesla</p>
+    </div>
+
+    <!-- Loading -->
+    <div id="loadingState" class="loading-state hidden">
+      <div class="spinner"></div>
+      <div class="loading-text">
+        <span>Agent is researching</span>
+        <span class="loading-dots"><span>.</span><span>.</span><span>.</span></span>
+      </div>
+      <p class="loading-sub">This may take 30–60 seconds</p>
+    </div>
+
+    <!-- Error -->
+    <div id="errorState" class="error-state hidden">
+      <svg class="error-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"/>
+        <line x1="12" y1="8" x2="12" y2="12"/>
+        <line x1="12" y1="16" x2="12.01" y2="16"/>
+      </svg>
+      <p id="errorMsg" class="error-msg"></p>
+    </div>
+
+    <!-- Result -->
+    <div id="resultSection" class="result-section hidden">
+
+      <!-- Answer card -->
+      <div class="result-card">
+        <div class="result-card-header">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="16" x2="12" y2="12"/>
+            <line x1="12" y1="8" x2="12.01" y2="8"/>
+          </svg>
+          <span>Analysis</span>
+        </div>
+        <p id="resultText" class="result-text"></p>
+      </div>
+
+      <!-- Agent Logs (expandable) -->
+      <details id="logsDetails" class="logs-details">
+        <summary class="logs-summary">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"
+               stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="4 17 10 11 4 5"/>
+            <line x1="12" y1="19" x2="20" y2="19"/>
+          </svg>
+          <span>Agent Logs</span>
+          <span id="logsChevron" class="logs-chevron">▸</span>
+        </summary>
+        <pre id="logsContent" class="logs-content"></pre>
+      </details>
+
+    </div>
+
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
