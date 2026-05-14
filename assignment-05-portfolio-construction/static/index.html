@@ -12,25 +12,77 @@
     .card { background: #1e293b; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
     label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
     select { width: 100%; max-width: 400px; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 1rem; }
-    button { margin-top: 1rem; padding: 0.75rem 2rem; background: #0ea5e9; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
-    button:hover { background: #38bdf8; }
-    button:disabled { background: #334155; cursor: not-allowed; }
+    button.primary { margin-top: 1rem; padding: 0.75rem 2rem; background: #0ea5e9; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    button.primary:hover { background: #38bdf8; }
+    button.primary:disabled { background: #334155; cursor: not-allowed; }
+
+    /* ── Metric tiles ──────────────────────────────────────────────── */
     .metrics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
-    .metric { background: #0f172a; border-radius: 8px; padding: 1rem; text-align: center; }
+    .metric { background: #0f172a; border-radius: 8px; padding: 1rem; text-align: center; position: relative; }
     .metric-value { font-size: 1.6rem; font-weight: 700; color: #38bdf8; }
-    .metric-label { font-size: 0.75rem; color: #64748b; margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .metric-label { font-size: 0.75rem; color: #64748b; margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; justify-content: center; gap: 4px; }
     .metric-value.green { color: #4ade80; }
-    .metric-value.red { color: #f87171; }
+    .metric-value.red   { color: #f87171; }
+
+    /* ── Holdings table ────────────────────────────────────────────── */
     table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
     th { text-align: left; padding: 0.6rem 0.8rem; color: #64748b; border-bottom: 1px solid #334155; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
-    td { padding: 0.8rem; border-bottom: 1px solid #1e293b; vertical-align: top; }
+    td { padding: 0.75rem 0.8rem; border-bottom: 1px solid #1e293b; vertical-align: middle; }
     tr:hover td { background: #1e293b; }
-    .ticker { font-weight: 700; color: #38bdf8; }
+    .ticker { font-weight: 700; color: #38bdf8; margin-right: 4px; }
     .weight-bar { display: inline-block; height: 6px; background: #0ea5e9; border-radius: 3px; margin-left: 8px; vertical-align: middle; }
     .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; background: #1e3a5f; color: #93c5fd; }
     .alpha-pos { color: #4ade80; }
     .alpha-neg { color: #f87171; }
-    .warning { background: #422006; border-left: 3px solid #f97316; padding: 0.75rem 1rem; border-radius: 4px; margin-bottom: 1rem; font-size: 0.85rem; color: #fed7aa; }
+
+    /* ── ℹ info button ─────────────────────────────────────────────── */
+    .info-btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #1e3a5f; color: #93c5fd;
+      font-size: 11px; font-weight: 700; font-style: italic; font-family: serif;
+      cursor: pointer; border: 1px solid #2d4f7c;
+      position: relative; vertical-align: middle; flex-shrink: 0;
+      transition: background 0.15s, color 0.15s;
+      user-select: none;
+    }
+    .info-btn:hover { background: #2d4f7c; color: #bfdbfe; }
+    .info-btn.active { background: #0ea5e9; color: #fff; border-color: #38bdf8; }
+
+    /* ── Tooltip popup ─────────────────────────────────────────────── */
+    .info-popup {
+      display: none;
+      position: absolute;
+      z-index: 200;
+      width: 280px;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 10px;
+      padding: 0.85rem 1rem;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      line-height: 1.55;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+      text-align: left;
+      font-style: normal;
+      font-weight: normal;
+      font-family: system-ui, sans-serif;
+      pointer-events: none;
+    }
+    .info-popup.open { display: block; pointer-events: auto; }
+    .info-popup .pop-row { margin-bottom: 0.5rem; }
+    .info-popup .pop-row:last-child { margin-bottom: 0; }
+    .info-popup .pop-label { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.05em; color: #475569; margin-bottom: 2px; }
+    .info-popup .pop-risk { color: #f97316; }
+    .info-popup .pop-warn-item { padding: 0.35rem 0; border-bottom: 1px solid #1e293b; font-size: 0.78rem; color: #fed7aa; }
+    .info-popup .pop-warn-item:last-child { border-bottom: none; }
+    .info-popup .pop-title { font-weight: 600; color: #e2e8f0; margin-bottom: 0.5rem; font-size: 0.82rem; }
+
+    /* Shared positioning anchors */
+    .metric { position: relative; }
+    .ticker-cell { position: relative; white-space: nowrap; }
+
+    /* ── Misc ──────────────────────────────────────────────────────── */
     .check { color: #4ade80; }
     .cross { color: #f87171; }
     #loading { display: none; text-align: center; padding: 3rem; color: #64748b; }
@@ -38,8 +90,8 @@
     @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
     #error { display: none; background: #450a0a; border-left: 3px solid #f87171; padding: 1rem; border-radius: 4px; color: #fca5a5; margin-bottom: 1rem; }
     #results { display: none; }
-    .rationale { font-size: 0.8rem; color: #94a3b8; margin-top: 0.25rem; }
-    .risk { font-size: 0.78rem; color: #f97316; margin-top: 0.15rem; }
+    .card-title { display: flex; align-items: center; gap: 8px; margin-bottom: 1rem; color: #94a3b8; }
+    .card-title h2 { font-size: 1rem; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -55,7 +107,7 @@
       <option value="Protect">Protect (up to 30 years)</option>
       <option value="Retirement">Retirement (beyond 30 years)</option>
     </select>
-    <button id="buildBtn" onclick="buildPortfolio()">Build Portfolio</button>
+    <button class="primary" id="buildBtn" onclick="buildPortfolio()">Build Portfolio</button>
   </div>
 
   <div id="loading">
@@ -68,6 +120,87 @@
   <div id="results"></div>
 
   <script>
+    // ── Tooltip system ──────────────────────────────────────────────────────
+    let _openPopup = null;
+
+    function toggleInfo(btn) {
+      const popup = btn.querySelector('.info-popup');
+      if (!popup) return;
+      const isOpen = popup.classList.contains('open');
+
+      // Close any currently open popup
+      if (_openPopup && _openPopup !== popup) {
+        _openPopup.classList.remove('open');
+        _openPopup.closest('.info-btn')?.classList.remove('active');
+        _openPopup = null;
+      }
+
+      if (isOpen) {
+        popup.classList.remove('open');
+        btn.classList.remove('active');
+        _openPopup = null;
+        return;
+      }
+
+      popup.classList.add('open');
+      btn.classList.add('active');
+      _openPopup = popup;
+
+      // Smart positioning: flip left if near right edge, flip up if near bottom
+      const rect = btn.getBoundingClientRect();
+      popup.style.top = '22px';
+      popup.style.bottom = 'auto';
+      popup.style.left = '0';
+      popup.style.right = 'auto';
+
+      if (rect.left + 290 > window.innerWidth - 16) {
+        popup.style.left = 'auto';
+        popup.style.right = '0';
+      }
+      if (rect.bottom + 200 > window.innerHeight) {
+        popup.style.top = 'auto';
+        popup.style.bottom = '22px';
+      }
+    }
+
+    // Close on click outside
+    document.addEventListener('click', e => {
+      if (!e.target.closest('.info-btn') && _openPopup) {
+        _openPopup.classList.remove('open');
+        _openPopup.closest('.info-btn')?.classList.remove('active');
+        _openPopup = null;
+      }
+    });
+
+    // Helper: create info button HTML
+    function infoBtn(popupHtml) {
+      return `<span class="info-btn" onclick="event.stopPropagation(); toggleInfo(this)">i
+        <div class="info-popup">${popupHtml}</div>
+      </span>`;
+    }
+
+    // ── Metric definitions (static) ─────────────────────────────────────────
+    const METRIC_DEFS = {
+      alpha:   { title: "Jensen's Alpha", text: "Annualized return above what the CAPM model predicts for this portfolio's level of market risk. Positive alpha means the portfolio historically outperformed its risk-adjusted benchmark." },
+      ret:     { title: "Expected Return", text: "Weighted-average 3-year annualized historical return of the holdings. Based on historical data — past performance does not guarantee future results." },
+      beta:    { title: "Portfolio Beta",  text: "Weighted-average sensitivity to S&P 500 movements. Beta 0.5 means the portfolio moves roughly half as much as the index. Lower beta = lower market risk." },
+      mdd:     { title: "Max Drawdown",    text: "Weighted-average of the largest peak-to-trough price decline for each holding over the 3-year window. Indicates the worst-case historical loss from a peak." },
+      sharpe:  { title: "Sharpe Ratio",    text: "(Expected Return − Risk-Free Rate) ÷ Portfolio Volatility. Measures return per unit of risk. Above 1.0 is good; above 2.0 is excellent." },
+      target:  { title: "Alpha Target",    text: "Whether the portfolio delivers the minimum required outperformance over the S&P 500 for the selected investor life stage (minimum +4% for all stages)." },
+    };
+
+    function metricInfoBtn(key, warnings) {
+      const d = METRIC_DEFS[key];
+      const warnHtml = warnings?.length
+        ? `<div style="margin-top:0.6rem;padding-top:0.6rem;border-top:1px solid #1e293b">
+             <div class="pop-label" style="margin-bottom:4px">Caveats</div>
+             ${warnings.map(w => `<div class="pop-warn-item">⚠ ${w}</div>`).join('')}
+           </div>`
+        : '';
+      return infoBtn(`<div class="pop-title">${d.title}</div><div>${d.text}</div>${warnHtml}`);
+    }
+
+    // ── Main fetch ──────────────────────────────────────────────────────────
     async function buildPortfolio() {
       const lifeStage = document.getElementById("lifeStage").value;
       const btn = document.getElementById("buildBtn");
@@ -100,80 +233,116 @@
       }
     }
 
+    // ── Render ──────────────────────────────────────────────────────────────
     function renderResults(data) {
       const el = document.getElementById("results");
       const m = data.portfolio_metrics;
       const v = data.verification;
       const profile = data.investor_profile;
+      const warnings = data.warnings || [];
 
+      // Route warnings to relevant metrics by keyword matching
+      function warningsFor(...keys) {
+        return warnings.filter(w => {
+          const wl = w.toLowerCase();
+          return keys.some(k => wl.includes(k));
+        });
+      }
+      const alphaWarns  = warningsFor('alpha', 'outperform');
+      const drawWarns   = warningsFor('drawdown', 'mdd', 'drawdown');
+      const dataWarns   = warningsFor('data', 'source', 'external', 'pre-computed', 'supplied');
+      const generalWarns = warnings.filter(w =>
+        !alphaWarns.includes(w) && !drawWarns.includes(w) && !dataWarns.includes(w)
+      );
+
+      // Warnings info popup for the card header (unrouted + data quality)
+      const headerWarns = [...dataWarns, ...generalWarns];
+      const headerInfoHtml = headerWarns.length
+        ? infoBtn(`<div class="pop-title">Portfolio Notices</div>${headerWarns.map(w => `<div class="pop-warn-item">⚠ ${w}</div>`).join('')}`)
+        : '';
+
+      // Verification checks
       const checks = [
-        ["stock_count_ok", "10 stocks selected"],
-        ["sp500_membership_ok", "All S&P 500 members"],
-        ["beta_cap_ok", "Beta cap satisfied"],
-        ["drawdown_constraint_ok", "Drawdown limit met"],
-        ["sector_concentration_ok", "Sector concentration OK"],
-        ["alpha_target_ok", "Alpha target met"],
-        ["weights_sum_ok", "Weights sum to 100%"],
+        ["stock_count_ok",        "10 stocks selected"],
+        ["sp500_membership_ok",   "All S&P 500 members"],
+        ["beta_cap_ok",           "Beta cap satisfied"],
+        ["drawdown_constraint_ok","Drawdown limit met"],
+        ["sector_concentration_ok","Sector concentration OK"],
+        ["alpha_target_ok",       "Alpha target met"],
+        ["weights_sum_ok",        "Weights sum to 100%"],
       ].map(([k, label]) =>
         `<div>${v[k] ? '<span class="check">✓</span>' : '<span class="cross">✗</span>'} ${label}</div>`
       ).join("");
 
-      const warnings = data.warnings?.length
-        ? data.warnings.map(w => `<div class="warning">⚠ ${w}</div>`).join("")
-        : "";
-
-      const rows = data.portfolio.map(s => `
-        <tr>
-          <td>
-            <span class="ticker">${s.ticker}</span>
-            <span class="tag">${s.sector.split(" ").slice(-1)[0]}</span>
-            <div class="rationale">${s.rationale}</div>
-            <div class="risk">⚠ ${s.key_risk}</div>
-          </td>
-          <td>${s.company_name}</td>
-          <td class="${s.jensen_alpha >= 0 ? 'alpha-pos' : 'alpha-neg'}">${s.jensen_alpha.toFixed(1)}%</td>
-          <td>${s.beta.toFixed(2)}</td>
-          <td>${s.annualized_return.toFixed(1)}%</td>
-          <td>${s.max_drawdown.toFixed(1)}%</td>
-          <td>
-            ${s.weight_pct.toFixed(1)}%
-            <span class="weight-bar" style="width:${Math.round(s.weight_pct * 2)}px"></span>
-          </td>
-        </tr>`).join("");
+      // Holdings rows — rationale/role/risk as info popup per stock
+      const rows = data.portfolio.map(s => {
+        const stockPopup = `
+          <div class="pop-row">
+            <div class="pop-label">Why selected</div>
+            <div>${s.rationale}</div>
+          </div>
+          <div class="pop-row">
+            <div class="pop-label">Portfolio role</div>
+            <div>${s.portfolio_role}</div>
+          </div>
+          <div class="pop-row">
+            <div class="pop-label" style="color:#f97316">Key risk</div>
+            <div class="pop-risk">⚠ ${s.key_risk}</div>
+          </div>`;
+        return `
+          <tr>
+            <td class="ticker-cell">
+              <span class="ticker">${s.ticker}</span>
+              <span class="tag">${s.sector.split(" ").slice(-1)[0]}</span>
+              ${infoBtn(stockPopup)}
+            </td>
+            <td>${s.company_name}</td>
+            <td class="${s.jensen_alpha >= 0 ? 'alpha-pos' : 'alpha-neg'}">${s.jensen_alpha.toFixed(1)}%</td>
+            <td>${s.beta.toFixed(2)}</td>
+            <td>${s.annualized_return.toFixed(1)}%</td>
+            <td>${s.max_drawdown.toFixed(1)}%</td>
+            <td>
+              ${s.weight_pct.toFixed(1)}%
+              <span class="weight-bar" style="width:${Math.round(s.weight_pct * 2)}px"></span>
+            </td>
+          </tr>`;
+      }).join("");
 
       el.innerHTML = `
-        ${warnings}
         <div class="card">
-          <h2 style="margin-bottom:1rem;color:#94a3b8">Portfolio Metrics — ${profile.life_stage}</h2>
+          <div class="card-title">
+            <h2>Portfolio Metrics — ${profile.life_stage}</h2>
+            ${headerInfoHtml}
+          </div>
           <div class="metrics-grid">
             <div class="metric">
               <div class="metric-value green">+${m.weighted_avg_alpha_pct.toFixed(1)}%</div>
-              <div class="metric-label">Jensen's Alpha</div>
+              <div class="metric-label">Jensen's Alpha ${metricInfoBtn('alpha', alphaWarns)}</div>
             </div>
             <div class="metric">
               <div class="metric-value">${m.expected_annualized_return_pct.toFixed(1)}%</div>
-              <div class="metric-label">Expected Return</div>
+              <div class="metric-label">Expected Return ${metricInfoBtn('ret', [])}</div>
             </div>
             <div class="metric">
               <div class="metric-value">${m.weighted_avg_beta.toFixed(2)}</div>
-              <div class="metric-label">Portfolio Beta</div>
+              <div class="metric-label">Portfolio Beta ${metricInfoBtn('beta', [])}</div>
             </div>
             <div class="metric">
               <div class="metric-value red">${m.portfolio_max_drawdown_pct.toFixed(1)}%</div>
-              <div class="metric-label">Max Drawdown</div>
+              <div class="metric-label">Max Drawdown ${metricInfoBtn('mdd', drawWarns)}</div>
             </div>
             <div class="metric">
               <div class="metric-value">${m.sharpe_ratio.toFixed(2)}</div>
-              <div class="metric-label">Sharpe Ratio</div>
+              <div class="metric-label">Sharpe Ratio ${metricInfoBtn('sharpe', [])}</div>
             </div>
             <div class="metric">
               <div class="metric-value ${m.alpha_target_met ? 'green' : 'red'}">${m.alpha_target_met ? '✓' : '✗'}</div>
-              <div class="metric-label">+4% Target Met</div>
+              <div class="metric-label">+4% Target ${metricInfoBtn('target', [])}</div>
             </div>
           </div>
         </div>
         <div class="card">
-          <h2 style="margin-bottom:1rem;color:#94a3b8">Portfolio Holdings</h2>
+          <div class="card-title"><h2>Portfolio Holdings</h2></div>
           <table>
             <thead>
               <tr>
@@ -185,10 +354,10 @@
           </table>
         </div>
         <div class="card">
-          <h2 style="margin-bottom:0.75rem;color:#94a3b8">Verification</h2>
+          <div class="card-title"><h2>Verification</h2></div>
           ${checks}
           ${v.corrections_made !== "None"
-            ? `<div style="margin-top:0.75rem;color:#f97316;font-size:0.85rem">Corrections: ${v.corrections_made}</div>`
+            ? `<div style="margin-top:0.75rem;color:#f97316;font-size:0.85rem">↳ Corrections: ${v.corrections_made}</div>`
             : ""}
         </div>
         <div class="card" style="font-size:0.75rem;color:#475569">
