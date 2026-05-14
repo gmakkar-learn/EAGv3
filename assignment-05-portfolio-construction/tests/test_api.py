@@ -102,6 +102,22 @@ def mock_portfolio_response():
     )
 
 
+def test_cache_status_endpoint():
+    response = client.get("/cache/status")
+    assert response.status_code == 200
+    body = response.json()
+    assert "memory_cached" in body
+    assert "disk_cached" in body
+    assert "metrics_computed" in body
+    assert "cache_date" in body
+
+
+def test_cache_clear_endpoint():
+    response = client.delete("/cache")
+    assert response.status_code == 200
+    assert "cleared_disk_files" in response.json()
+
+
 def test_portfolio_valid_request_mocked(mock_portfolio_response):
     with patch("app.main.run_portfolio_pipeline") as mock_run:
         mock_run.return_value = mock_portfolio_response
