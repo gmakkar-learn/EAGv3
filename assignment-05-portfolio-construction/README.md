@@ -88,9 +88,7 @@ Click **Build Portfolio**. The first request for a given life stage fetches live
 
 ![Portfolio Metrics](docs/screenshots/02-metrics.png)
 
-Six key metrics are displayed with inline **ℹ** information icons. Click or hover any icon to see:
-- A plain-English definition of the metric
-- Any relevant caveats automatically routed from Claude's analysis (e.g. drawdown warnings appear on the Max Drawdown tile, alpha caveats on the Jensen's Alpha tile)
+Six key metrics are displayed with inline **ℹ** information icons. Click or hover any icon to see a plain-English definition of the metric and any relevant caveats automatically routed from Claude's analysis (e.g. drawdown warnings appear on the Max Drawdown tile, alpha caveats on the Jensen's Alpha tile).
 
 | Metric | What it shows |
 |---|---|
@@ -101,7 +99,9 @@ Six key metrics are displayed with inline **ℹ** information icons. Click or ho
 | **Sharpe Ratio** | (Return − Risk-Free Rate) ÷ Volatility — higher is better |
 | **+4% Target** | Whether the portfolio meets the minimum alpha floor for this life stage |
 
-A **ℹ** icon next to the card title surfaces general data-quality notices from Claude.
+A **ℹ** icon next to the card title surfaces general data-quality notices from Claude. Example tooltip:
+
+![Metric tooltip](docs/screenshots/05-metric-tooltip.png)
 
 ### Step 3 — Portfolio Holdings Table
 
@@ -112,6 +112,8 @@ The table shows all 10 selected stocks with their key quantitative metrics. Each
 - **Why Selected** — the primary alpha driver that justified inclusion
 - **Portfolio Role** — how this holding contributes to sector exposure and diversification
 - **Key Risk** — the primary risk to monitor for this position (highlighted in orange)
+
+![Stock info tooltip](docs/screenshots/06-stock-tooltip.png)
 
 ### Step 4 — Verification Card
 
