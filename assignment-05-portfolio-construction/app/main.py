@@ -70,10 +70,9 @@ def run_portfolio_pipeline(life_stage: LifeStage) -> PortfolioResponse:
 
     prices_df = get_monthly_prices(tickers, years=3)
 
-    spy_prices = prices_df.get("SPY")
-    if spy_prices is None:
-        spy_data = get_monthly_prices(["SPY"], years=3)
-        spy_prices = spy_data["SPY"]
+    import yfinance as yf
+    spy_hist = yf.Ticker("SPY").history(period="3y", interval="1mo")
+    spy_prices = spy_hist["Close"]
 
     all_metrics = compute_all_metrics(
         tickers=tickers,

@@ -103,7 +103,7 @@ def build_portfolio_with_llm(
 
     response = client.messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=4096,
+        max_tokens=8192,
         system=_get_system_prompt(),
         messages=[{"role": "user", "content": user_message}],
     )

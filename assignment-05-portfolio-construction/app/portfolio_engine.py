@@ -53,6 +53,11 @@ def compute_all_metrics(
     company_info: dict[str, dict],
     years: int = 3,
 ) -> list[StockMetrics]:
+    # Normalize timezone so tz-aware and tz-naive series can align
+    if spy_prices.index.tz is not None:
+        spy_prices = spy_prices.copy()
+        spy_prices.index = spy_prices.index.tz_localize(None)
+
     spy_returns = spy_prices.pct_change().dropna()
     results = []
 
@@ -60,6 +65,9 @@ def compute_all_metrics(
         if ticker not in prices_df.columns:
             continue
         series = prices_df[ticker].dropna()
+        if series.index.tz is not None:
+            series = series.copy()
+            series.index = series.index.tz_localize(None)
         if len(series) < 12:
             continue
 
