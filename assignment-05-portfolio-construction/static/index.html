@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio Constructor</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: system-ui, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; padding: 2rem; }
+    h1 { font-size: 1.8rem; color: #38bdf8; margin-bottom: 0.25rem; }
+    .subtitle { color: #64748b; margin-bottom: 2rem; font-size: 0.9rem; }
+    .card { background: #1e293b; border-radius: 12px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #94a3b8; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    select { width: 100%; max-width: 400px; padding: 0.75rem 1rem; border-radius: 8px; border: 1px solid #334155; background: #0f172a; color: #e2e8f0; font-size: 1rem; }
+    button { margin-top: 1rem; padding: 0.75rem 2rem; background: #0ea5e9; color: white; border: none; border-radius: 8px; font-size: 1rem; font-weight: 600; cursor: pointer; transition: background 0.2s; }
+    button:hover { background: #38bdf8; }
+    button:disabled { background: #334155; cursor: not-allowed; }
+    .metrics-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .metric { background: #0f172a; border-radius: 8px; padding: 1rem; text-align: center; }
+    .metric-value { font-size: 1.6rem; font-weight: 700; color: #38bdf8; }
+    .metric-label { font-size: 0.75rem; color: #64748b; margin-top: 0.25rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .metric-value.green { color: #4ade80; }
+    .metric-value.red { color: #f87171; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th { text-align: left; padding: 0.6rem 0.8rem; color: #64748b; border-bottom: 1px solid #334155; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.05em; }
+    td { padding: 0.8rem; border-bottom: 1px solid #1e293b; vertical-align: top; }
+    tr:hover td { background: #1e293b; }
+    .ticker { font-weight: 700; color: #38bdf8; }
+    .weight-bar { display: inline-block; height: 6px; background: #0ea5e9; border-radius: 3px; margin-left: 8px; vertical-align: middle; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; background: #1e3a5f; color: #93c5fd; }
+    .alpha-pos { color: #4ade80; }
+    .alpha-neg { color: #f87171; }
+    .warning { background: #422006; border-left: 3px solid #f97316; padding: 0.75rem 1rem; border-radius: 4px; margin-bottom: 1rem; font-size: 0.85rem; color: #fed7aa; }
+    .check { color: #4ade80; }
+    .cross { color: #f87171; }
+    #loading { display: none; text-align: center; padding: 3rem; color: #64748b; }
+    #loading .spinner { font-size: 2rem; animation: spin 1s linear infinite; display: inline-block; margin-bottom: 1rem; }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    #error { display: none; background: #450a0a; border-left: 3px solid #f87171; padding: 1rem; border-radius: 4px; color: #fca5a5; margin-bottom: 1rem; }
+    #results { display: none; }
+    .rationale { font-size: 0.8rem; color: #94a3b8; margin-top: 0.25rem; }
+    .risk { font-size: 0.78rem; color: #f97316; margin-top: 0.15rem; }
+  </style>
+</head>
+<body>
+  <h1>Portfolio Constructor</h1>
+  <p class="subtitle">Jensen's Alpha-maximizing S&amp;P 500 portfolios tailored to your investor life stage</p>
+
+  <div class="card">
+    <label for="lifeStage">Investor Life Stage</label>
+    <select id="lifeStage">
+      <option value="Early Investor">Early Investor (&lt; 5 years working capital)</option>
+      <option value="Accelerate">Accelerate (up to 10 years)</option>
+      <option value="Growth" selected>Growth (up to 20 years)</option>
+      <option value="Protect">Protect (up to 30 years)</option>
+      <option value="Retirement">Retirement (beyond 30 years)</option>
+    </select>
+    <button id="buildBtn" onclick="buildPortfolio()">Build Portfolio</button>
+  </div>
+
+  <div id="loading">
+    <div class="spinner">⚙</div>
+    <div>Fetching S&amp;P 500 data and constructing portfolio…</div>
+    <div style="font-size:0.8rem; margin-top:0.5rem; color:#475569">This may take 30–90 seconds on first run</div>
+  </div>
+
+  <div id="error"></div>
+  <div id="results"></div>
+
+  <script>
+    async function buildPortfolio() {
+      const lifeStage = document.getElementById("lifeStage").value;
+      const btn = document.getElementById("buildBtn");
+      btn.disabled = true;
+      document.getElementById("loading").style.display = "block";
+      document.getElementById("results").style.display = "none";
+      document.getElementById("error").style.display = "none";
+
+      try {
+        const res = await fetch("/portfolio", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify({life_stage: lifeStage})
+        });
+
+        if (!res.ok) {
+          const err = await res.json();
+          throw new Error(err.detail || "Request failed");
+        }
+
+        const data = await res.json();
+        renderResults(data);
+      } catch (e) {
+        const errEl = document.getElementById("error");
+        errEl.textContent = "Error: " + e.message;
+        errEl.style.display = "block";
+      } finally {
+        btn.disabled = false;
+        document.getElementById("loading").style.display = "none";
+      }
+    }
+
+    function renderResults(data) {
+      const el = document.getElementById("results");
+      const m = data.portfolio_metrics;
+      const v = data.verification;
+      const profile = data.investor_profile;
+
+      const checks = [
+        ["stock_count_ok", "10 stocks selected"],
+        ["sp500_membership_ok", "All S&P 500 members"],
+        ["beta_cap_ok", "Beta cap satisfied"],
+        ["drawdown_constraint_ok", "Drawdown limit met"],
+        ["sector_concentration_ok", "Sector concentration OK"],
+        ["alpha_target_ok", "Alpha target met"],
+        ["weights_sum_ok", "Weights sum to 100%"],
+      ].map(([k, label]) =>
+        `<div>${v[k] ? '<span class="check">✓</span>' : '<span class="cross">✗</span>'} ${label}</div>`
+      ).join("");
+
+      const warnings = data.warnings?.length
+        ? data.warnings.map(w => `<div class="warning">⚠ ${w}</div>`).join("")
+        : "";
+
+      const rows = data.portfolio.map(s => `
+        <tr>
+          <td>
+            <span class="ticker">${s.ticker}</span>
+            <span class="tag">${s.sector.split(" ").slice(-1)[0]}</span>
+            <div class="rationale">${s.rationale}</div>
+            <div class="risk">⚠ ${s.key_risk}</div>
+          </td>
+          <td>${s.company_name}</td>
+          <td class="${s.jensen_alpha >= 0 ? 'alpha-pos' : 'alpha-neg'}">${s.jensen_alpha.toFixed(1)}%</td>
+          <td>${s.beta.toFixed(2)}</td>
+          <td>${s.annualized_return.toFixed(1)}%</td>
+          <td>${s.max_drawdown.toFixed(1)}%</td>
+          <td>
+            ${s.weight_pct.toFixed(1)}%
+            <span class="weight-bar" style="width:${Math.round(s.weight_pct * 2)}px"></span>
+          </td>
+        </tr>`).join("");
+
+      el.innerHTML = `
+        ${warnings}
+        <div class="card">
+          <h2 style="margin-bottom:1rem;color:#94a3b8">Portfolio Metrics — ${profile.life_stage}</h2>
+          <div class="metrics-grid">
+            <div class="metric">
+              <div class="metric-value green">+${m.weighted_avg_alpha_pct.toFixed(1)}%</div>
+              <div class="metric-label">Jensen's Alpha</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">${m.expected_annualized_return_pct.toFixed(1)}%</div>
+              <div class="metric-label">Expected Return</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">${m.weighted_avg_beta.toFixed(2)}</div>
+              <div class="metric-label">Portfolio Beta</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value red">${m.portfolio_max_drawdown_pct.toFixed(1)}%</div>
+              <div class="metric-label">Max Drawdown</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value">${m.sharpe_ratio.toFixed(2)}</div>
+              <div class="metric-label">Sharpe Ratio</div>
+            </div>
+            <div class="metric">
+              <div class="metric-value ${m.alpha_target_met ? 'green' : 'red'}">${m.alpha_target_met ? '✓' : '✗'}</div>
+              <div class="metric-label">+4% Target Met</div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <h2 style="margin-bottom:1rem;color:#94a3b8">Portfolio Holdings</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Stock</th><th>Company</th><th>α Alpha</th>
+                <th>Beta</th><th>Return</th><th>Max DD</th><th>Weight</th>
+              </tr>
+            </thead>
+            <tbody>${rows}</tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h2 style="margin-bottom:0.75rem;color:#94a3b8">Verification</h2>
+          ${checks}
+          ${v.corrections_made !== "None"
+            ? `<div style="margin-top:0.75rem;color:#f97316;font-size:0.85rem">Corrections: ${v.corrections_made}</div>`
+            : ""}
+        </div>
+        <div class="card" style="font-size:0.75rem;color:#475569">
+          Data: ${data.data_provenance.data_source} ·
+          ${data.data_provenance.lookback_period} ·
+          Benchmark: ${data.data_provenance.benchmark} ·
+          Risk-free rate: ${data.data_provenance.risk_free_rate}% ·
+          As of: ${data.data_provenance.data_as_of}
+          <br><br>
+          <em>For analytical purposes only. Not financial advice.</em>
+        </div>`;
+
+      el.style.display = "block";
+    }
+  </script>
+</body>
+</html>
