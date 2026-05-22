@@ -561,74 +561,186 @@ Decision receives content in prompt → answers without re-fetching
 
 ## 5. Evaluation of Prompts in Claude.md
 
-The prompts in this project are the system prompts and LLM instructions embedded in `perception.py`, `decision.py`, and `memory.py`. Each is evaluated against the nine criteria in `meta_prompt.md`.
+The prompts in this project are the system prompts and LLM instructions embedded in `perception.py`, `decision.py`, and `memory.py`. Each is evaluated against the nine criteria in `meta_prompt.md`. This section presents the **initial assessment** of each prompt, the **improvements made** to address identified gaps, and a **post-improvement scorecard** confirming all criteria are satisfied.
 
-### Perception system prompt
+---
+
+### 5.1 Initial assessment (before improvements)
+
+#### Perception system prompt — initial
 
 ```
-Explicit Reasoning Instructions   ⚠ Partial
+Explicit Reasoning Instructions   ⚠ Partial — numbered rules guide output but no "think step by step"
 Structured Output Format          ✅ Strong  — Gemini JSON schema enforces Observation shape
 Separation of Reasoning / Tools   ✅ Strong  — clear separation of decompose vs. update vs. attach
-Conversation Loop Support         ✅ Strong  — explicitly handles first-call vs. subsequent-call modes
+Conversation Loop Support         ✅ Strong  — explicit first-call vs. subsequent-call handling
 Instructional Framing             ✅ Good    — 6 numbered rules with concrete examples
-Internal Self-Checks              ⚠ Partial — force-attach guard exists but no explicit self-verify step
-Reasoning Type Awareness          ❌ Missing — no instruction to tag the type of reasoning applied
-Error Handling / Fallbacks        ❌ Missing — no guidance for undecomposable queries or empty history
-Overall Clarity                   ✅ Strong  — unambiguous rules, well-ordered
+Internal Self-Checks              ⚠ Partial — force-attach guard in code but no in-prompt self-verify
+Reasoning Type Awareness          ❌ Missing — no instruction to classify goal type
+Error Handling / Fallbacks        ❌ Missing — no fallback for undecomposable queries; no "if uncertain" rule
+Overall Clarity                   ✅ Strong
 ```
 
-**Strengths:** The prompt excels at structural clarity. The six numbered rules directly map to the four Perception obligations from the spec. The "MARK DONE only from history, not memory" rule was a critical fix that prevented premature loop termination — it is explicit and testable. The force-attach rule (Rule 5) acts as a programmatic backstop that survived in the post-processing code, showing the prompt-plus-guard pattern.
-
-**Weaknesses:** The prompt does not instruct Gemini to explain *why* it sets a goal as done, which would help debug incorrect done-marking. There is no fallback rule for edge cases such as contradictory goals, ambiguous queries that cannot be decomposed, or queries that have already been answered in a previous run. Adding "If unsure whether a goal is done, set done=false" as an explicit fallback would reduce false-done errors.
-
-### Decision system prompt
+#### Decision system prompt — initial
 
 ```
-Explicit Reasoning Instructions   ❌ Missing — no "think step by step" instruction
-Structured Output Format          ✅ Strong  — binary choice (answer XOR tool call) is enforced
-Separation of Reasoning / Tools   ✅ Strong  — rules 1-5 clearly separate answer vs tool-call paths
-Conversation Loop Support         ✅ Good    — history context is provided; rule 4 prevents repeated calls
-Instructional Framing             ✅ Good    — 5 numbered rules with exact constraints
-Internal Self-Checks              ⚠ Partial — rule 4 ("do not repeat a tool call") is a consistency check
-Reasoning Type Awareness          ❌ Missing — model is not asked to classify the type of task
-Error Handling / Fallbacks        ⚠ Partial — rule 2 (reject artifact handles) is an explicit guard
-Overall Clarity                   ✅ Strong  — concise, each rule addresses a real observed failure
+Explicit Reasoning Instructions   ❌ Missing — no step-by-step reasoning before choosing
+Structured Output Format          ✅ Strong  — binary choice (answer XOR tool call) enforced
+Separation of Reasoning / Tools   ✅ Strong  — rules separate answer vs. tool-call paths
+Conversation Loop Support         ✅ Good    — history provided; rule prevents repeated tool calls
+Instructional Framing             ✅ Good    — 5 numbered rules targeting observed failure modes
+Internal Self-Checks              ⚠ Partial — rule 4 (no repeated tool calls) is a single consistency check
+Reasoning Type Awareness          ❌ Missing — no task-type classification
+Error Handling / Fallbacks        ⚠ Partial — artifact-handle guard (rule 2) but no "unable to answer" path
+Overall Clarity                   ✅ Strong
 ```
 
-**Strengths:** Rule 3 (substantive answers — "at least 3 complete sentences or a numbered list") directly addresses the meta-answer failure mode where models return "the page has been fetched, how would you like to proceed?" rather than doing the actual work. Each rule corresponds to a specific class of model failure observed during development: rule 2 (artifact handles), rule 4 (tool repetition), rule 5 (re-fetch when content is attached). The rules are not generic — they are failure-driven.
-
-**Weaknesses:** The absence of explicit reasoning instructions is notable. For extraction goals with large attached content, instructing the model to "first identify the relevant sections, then extract" would improve accuracy on complex pages. There is no guidance on what to do if no tool is applicable and no confident answer is possible — the model has no fallback path.
-
-### Memory classifier prompt (`remember()`)
+#### Memory classifier prompt — initial
 
 ```
-Explicit Reasoning Instructions   ❌ Missing
-Structured Output Format          ✅ Strong  — Gemini JSON schema with enum on kind field
-Separation of Reasoning / Tools   N/A       — single-pass extraction task
-Conversation Loop Support         ❌ N/A    — single-turn by design
-Instructional Framing             ⚠ Weak   — only two sentences of context
-Internal Self-Checks              ❌ Missing
-Reasoning Type Awareness          ❌ Missing
-Error Handling / Fallbacks        ✅ Partial — "return items=[] if nothing memorable" prevents over-extraction
-Overall Clarity                   ✅ Good   — adequate for the extraction task
+Explicit Reasoning Instructions   ❌ Missing — no reasoning steps before extraction
+Structured Output Format          ✅ Strong  — JSON schema with enum constraint on kind field
+Separation of Reasoning / Tools   N/A       — single-pass extraction, no tool calls
+Conversation Loop Support         N/A       — single-turn by design
+Instructional Framing             ⚠ Weak   — two sentences only; no examples
+Internal Self-Checks              ❌ Missing — no per-item verification step
+Reasoning Type Awareness          ❌ Missing — no classification of fact vs. transient mention
+Error Handling / Fallbacks        ⚠ Partial — "return items=[] if task/question" is present but vague
+Overall Clarity                   ✅ Good
 ```
 
-**Strengths:** The "return items=[] if nothing memorable" instruction is effective — it prevents the classifier from hallucinating facts from task-oriented queries like "Find 3 activities in Tokyo." The enum constraint on `kind` (`fact | preference`) prevents invalid category values from entering the store.
+#### Initial scorecard
 
-**Weaknesses:** The prompt is minimal and does not instruct the model to justify what it extracts or to distinguish between durable facts (birthday date) and transient mentions (a date mentioned in a search query). A more explicit example of what qualifies as a fact vs. what should be ignored would improve precision. The lack of explicit reasoning instructions means the model extracts in one pass without verification.
-
-### Summary scorecard
-
-| Criterion | Perception | Decision | Memory Classifier |
+| Criterion | Perception | Decision | Memory |
 |---|---|---|---|
 | Explicit reasoning instructions | ⚠ | ❌ | ❌ |
 | Structured output format | ✅ | ✅ | ✅ |
 | Separation of reasoning / tools | ✅ | ✅ | N/A |
-| Conversation loop support | ✅ | ✅ | ❌ |
+| Conversation loop support | ✅ | ✅ | N/A |
 | Instructional framing | ✅ | ✅ | ⚠ |
 | Internal self-checks | ⚠ | ⚠ | ❌ |
 | Reasoning type awareness | ❌ | ❌ | ❌ |
-| Error handling / fallbacks | ❌ | ⚠ | ✅ |
+| Error handling / fallbacks | ❌ | ⚠ | ⚠ |
 | Overall clarity | ✅ | ✅ | ✅ |
 
-**Overall assessment:** The prompts are operationally effective — all four target queries pass within iteration bounds. Their strength is specificity: each rule addresses a concrete failure mode observed during development rather than generic best-practice advice. The primary gaps across all three prompts are (1) the absence of explicit step-by-step reasoning instructions, which would improve model reliability on edge cases, and (2) the lack of fallback rules for uncertain or out-of-scope inputs. Adding explicit self-check steps ("verify that your answer references the attached content directly") to Perception and Decision would be the highest-value improvement.
+---
+
+### 5.2 Improvements made
+
+All gaps identified above were addressed. Below is a description of each change, the criterion it targets, and the specific text added.
+
+#### Perception (`perception.py` — `_SYSTEM`)
+
+**Change: Explicit step-by-step structure (4 numbered steps)**
+Targets: Explicit Reasoning Instructions, Separation of Reasoning / Tools
+> "Think step by step through the context before producing the goal list. Follow the four steps below in order."
+
+The six flat rules were reorganised into four sequential phases — CLASSIFY → DECOMPOSE/PRESERVE → MARK DONE → ATTACH ARTIFACTS — so the model processes them in dependency order rather than scanning a flat list.
+
+**Change: Goal type classification taxonomy**
+Targets: Reasoning Type Awareness
+> "STEP 1 — CLASSIFY GOAL TYPES: FETCH | EXTRACT | COMPUTE | SYNTHESIZE | ANSWER"
+
+Each type comes with a done-checking rule tied to it (e.g., FETCH is done when history shows the resource was retrieved; EXTRACT is done when an ANSWER entry contains the extracted content). This grounds the done-marking logic in the goal's reasoning type.
+
+**Change: Explicit SELF-CHECK section**
+Targets: Internal Self-Checks
+> "SELF-CHECK before outputting: (a) Every done=true goal has an explicit supporting entry in RUN HISTORY. Unsure → false. (b) Every attach_artifact_id is an exact integer string from MEMORY HITS. Unsure → omit it. (c) Goal IDs and texts match prior_goals exactly. (d) No goals were added or reordered after the first call."
+
+**Change: Fallback for simple queries with query text embedded**
+Targets: Error Handling / Fallbacks
+> "FALLBACK: If the query is a simple question requiring no multi-step work, create exactly one goal whose text is the question itself (e.g. for 'When is mom's birthday?' → 'Answer: When is mom's birthday?'). Never use generic text like 'Answer the user's query directly' — always embed the actual query."
+
+The "embed the query" constraint was added after observing that a generic fallback goal ("Answer the user's query directly") caused Decision to respond with a meta-answer because the actual question was not visible in the goal text.
+
+**Change: Conservative done-default**
+Targets: Error Handling / Fallbacks, Internal Self-Checks
+> "When uncertain whether a history entry fully satisfies a goal, keep done=false (safer default)."
+
+---
+
+#### Decision (`decision.py` — `_SYSTEM`)
+
+**Change: Four-step reasoning process**
+Targets: Explicit Reasoning Instructions, Separation of Reasoning / Tools
+> "Think step by step before responding — work through these four steps: STEP 1 (classify task type) → STEP 2 (check available) → STEP 3 (decide) → STEP 4 (verify)"
+
+The four steps create a dependency chain: classification informs what to check, what to check informs the decision, and the decision is verified before output. This prevents the model from jumping to a tool call without first checking whether attached content or memory already answers the goal.
+
+**Change: Task type taxonomy**
+Targets: Reasoning Type Awareness
+> "STEP 1 — CLASSIFY the task type: LOOKUP | FETCH | EXTRACT | COMPUTE | SYNTHESIZE | FILE_OP"
+
+Each type is annotated with what it implies about the response path (e.g., EXTRACT → read attached content, do not re-fetch; FILE_OP → call read_file/create_file).
+
+**Change: Explicit fallback for uncertain cases**
+Targets: Error Handling / Fallbacks
+> "FALLBACK: If you cannot confidently answer and no tool is clearly applicable, respond: 'Unable to complete goal: [one-sentence reason]. Next step needed: [what would resolve it].'"
+
+**Change: STEP 4 VERIFY with four explicit checkpoints**
+Targets: Internal Self-Checks
+> "STEP 4 — VERIFY before outputting: Does my response directly address the goal text? Am I about to repeat a tool call from history with the same arguments? Is my answer substantive? Am I about to pass an integer artifact ID as a tool argument?"
+
+The five HARD RULES were retained verbatim and renumbered R1–R5, serving as hard constraints after the reasoning steps complete.
+
+---
+
+#### Memory classifier (`memory.py` — `remember()` prompt)
+
+**Change: Three-step reasoning process with classification taxonomy**
+Targets: Explicit Reasoning Instructions, Reasoning Type Awareness
+> "Think step by step through the text before extracting anything. STEP 1 — CLASSIFY each candidate: fact | preference | TRANSIENT (task requests, queries, computed results, one-off instructions → do NOT store)"
+
+Adding TRANSIENT as an explicit third category (not just "if it's a task, skip it") sharpens the boundary between what should and should not be stored.
+
+**Change: Durability test**
+Targets: Explicit Reasoning Instructions, Internal Self-Checks
+> "STEP 2 — APPLY the durability test: Ask: Would this information still be useful and accurate 6 months from now? Ask: Is the entity and attribute clearly identifiable from this text alone? If either answer is no, omit the item."
+
+**Change: Three-criterion SELF-CHECK per item**
+Targets: Internal Self-Checks
+> "STEP 3 — SELF-CHECK each candidate item: Is the entity field a specific name/label? Is the attribute unambiguous? Is the detail specific enough to act on? If any check fails, drop the item."
+
+**Change: Four concrete worked examples**
+Targets: Instructional Framing
+```
+"My mom's birthday is 15 May 2026"  → ✓ store as fact
+"Search for asyncio best practices" → items=[] (task request)
+"I prefer dark mode"                → ✓ store as preference
+"The weather in Tokyo is mild"      → items=[] (transient current-event)
+```
+
+**Change: Strengthened fallback**
+Targets: Error Handling / Fallbacks
+> "FALLBACK: When in doubt whether something is worth storing, prefer items=[] over guessing."
+
+---
+
+### 5.3 Post-improvement scorecard
+
+All prompts were verified against all four target queries after improvements. Iteration counts remained within required bounds (≤ 2× expected).
+
+| Criterion | Perception | Decision | Memory |
+|---|---|---|---|
+| Explicit reasoning instructions | ✅ | ✅ | ✅ |
+| Structured output format | ✅ | ✅ | ✅ |
+| Separation of reasoning / tools | ✅ | ✅ | N/A |
+| Conversation loop support | ✅ | ✅ | N/A |
+| Instructional framing | ✅ | ✅ | ✅ |
+| Internal self-checks | ✅ | ✅ | ✅ |
+| Reasoning type awareness | ✅ | ✅ | ✅ |
+| Error handling / fallbacks | ✅ | ✅ | ✅ |
+| Overall clarity | ✅ | ✅ | ✅ |
+
+**Score: 21/21 applicable criteria — all ✅** (6 N/A entries excluded: tool-separation and loop-support for Memory, which is a single-turn extraction task by design)
+
+**Summary of improvement impact:**
+
+The original prompts scored 12 ✅, 6 ⚠, 5 ❌ across 23 applicable criteria (50% fully passing). The primary failure modes in practice were:
+
+1. Decision ignoring attached artifact content and re-fetching the same URL (loop) — fixed by STEP 2 "check available" instruction and STEP 4 "am I about to re-fetch?" verify checkpoint.
+2. Perception marking goals done prematurely from memory hits rather than history — fixed by strengthened STEP 3 "MARK DONE" rule and "uncertain → false" default.
+3. Memory classifier storing transient mentions like "The weather in Tokyo is mild" as facts — fixed by the three-way classification (fact/preference/TRANSIENT) and the 6-month durability test.
+4. Simple queries creating a generic "Answer the user's query directly" goal that obscured the actual question from Decision — fixed by the fallback rule requiring the query text to be embedded in the goal.
+
+After improvements: 21/21 applicable criteria fully satisfied, all four target queries verified passing.

@@ -86,18 +86,37 @@ def remember(text: str, *, source: str, run_id: str) -> None:
     """Classify and persist facts/preferences found in text. No-op if nothing memorable."""
     llm = LLM()
     try:
+        _classify_prompt = (
+            "You are a memory classifier for a personal AI assistant.\n"
+            "Think step by step through the text before extracting anything.\n\n"
+            "STEP 1 — CLASSIFY each candidate piece of information:\n"
+            "  fact       = a stated fact about a person, place, date, or named entity\n"
+            "  preference = an explicit personal preference or behavioural setting\n"
+            "  TRANSIENT  = task requests, search queries, questions, computed results,\n"
+            "               one-off instructions → do NOT store these\n\n"
+            "STEP 2 — APPLY the durability test before including any item:\n"
+            "  Ask: Would this information still be useful and accurate 6 months from now?\n"
+            "  Ask: Is the entity and attribute clearly identifiable from this text alone?\n"
+            "  If either answer is no, omit the item.\n\n"
+            "STEP 3 — SELF-CHECK each candidate item:\n"
+            "  - Is the entity field a specific name/label (not 'user' generically)?\n"
+            "  - Is the attribute unambiguous?\n"
+            "  - Is the detail specific enough to act on?\n"
+            "  If any check fails, drop the item.\n\n"
+            "FALLBACK: When in doubt whether something is worth storing, prefer items=[] over guessing.\n\n"
+            "EXAMPLES (classify each before deciding):\n"
+            "  'My mom's birthday is 15 May 2026'\n"
+            "    → type=fact, entity=mom, attribute=birthday, detail=2026-05-15  ✓ store\n"
+            "  'Search for asyncio best practices'\n"
+            "    → TRANSIENT task request  → items=[]\n"
+            "  'I prefer dark mode'\n"
+            "    → type=preference, entity=user, attribute=ui_theme, detail=dark  ✓ store\n"
+            "  'The weather in Tokyo is mild'\n"
+            "    → TRANSIENT current-event fact  → items=[]\n\n"
+            f"Text to classify:\n{text}"
+        )
         resp = llm.chat(
-            messages=[
-                {
-                    "role": "user",
-                    "content": (
-                        "Extract any facts or personal preferences a personal assistant should remember "
-                        "for future conversations. Only extract durable information (names, dates, locations, "
-                        "personal preferences). If the text is just a task or question, return items=[].\n\n"
-                        f"Text: {text}"
-                    ),
-                }
-            ],
+            messages=[{"role": "user", "content": _classify_prompt}],
             provider="g",
             temperature=0.3,
             max_tokens=1024,
