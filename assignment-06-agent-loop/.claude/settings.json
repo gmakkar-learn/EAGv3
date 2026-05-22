@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip show *)",
+      "Bash(python3 -c \"from tavily import TavilyClient; print\\('ok'\\)\")",
+      "Bash(python3 -c \"from ddgs import DDGS; print\\('ok'\\)\")",
+      "Bash(python3 -c \"import mcp.server.fastmcp; print\\('mcp ok'\\)\")",
+      "Bash(python3 -c \"import httpx; print\\('httpx ok'\\)\")",
+      "mcp__plugin_context-mode_context-mode__ctx_batch_execute",
+      "Bash(sqlite3 gateway_v3.db \"SELECT provider, model, status, error, latency_ms FROM calls WHERE provider='nvidia' ORDER BY ts DESC LIMIT 5;\")",
+      "Bash(python3 -c \"import json,sys; data=json.load\\(sys.stdin\\); [print\\(m['id']\\) for m in data.get\\('data',[]\\)]\")"
+    ]
+  }
+}
