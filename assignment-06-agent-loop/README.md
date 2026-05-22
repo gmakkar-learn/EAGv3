@@ -1,5 +1,30 @@
 # Assignment 06 — Four-Role Cognitive Agent Loop
 
+## Table of Contents
+
+- [1. Overview](#1-overview)
+- [2. Usage](#2-usage)
+  - [Prerequisites](#prerequisites)
+  - [Running the agent](#running-the-agent)
+  - [Resetting state between runs](#resetting-state-between-runs)
+  - [Example 1 — Wikipedia extraction](#example-1--wikipedia-extraction-artifact-attach-path)
+  - [Example 2 — Multi-goal planning with weather constraint](#example-2--multi-goal-planning-with-weather-constraint)
+  - [Example 3 — Durable memory across two runs](#example-3--durable-memory-across-two-runs)
+  - [Example 4 — Multi-source synthesis](#example-4--multi-source-synthesis)
+- [3. Architecture](#3-architecture)
+  - [Component map](#component-map)
+  - [Component purposes and design decisions](#component-purposes-and-design-decisions)
+- [4. Workflow](#4-workflow)
+  - [Main loop](#main-loop-agent6py)
+  - [Interface protocols](#interface-protocols)
+  - [Artifact data flow](#artifact-data-flow)
+- [5. Evaluation of Prompts in Claude.md](#5-evaluation-of-prompts-in-claudemd)
+  - [5.1 Initial assessment](#51-initial-assessment-before-improvements)
+  - [5.2 Improvements made](#52-improvements-made)
+  - [5.3 Post-improvement scorecard](#53-post-improvement-scorecard)
+
+---
+
 ## 1. Overview
 
 This project implements a multi-role AI agent that decomposes complex user queries into bounded goals and works through them iteratively. It is the Session 6 assignment of the EAGv3 curriculum.
